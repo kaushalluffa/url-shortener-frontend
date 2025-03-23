@@ -49,12 +49,12 @@ export default function SettingsPage() {
         confirmPassword: "",
       },
     });
-
   const onProfileSubmit = async (values: ProfileFormValues) => {
     setIsProfileLoading(true);
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 500));
     setIsProfileLoading(false);
+    console.log(values);
   };
 
   const onPasswordSubmit = async (values: PasswordFormValues) => {
@@ -62,6 +62,7 @@ export default function SettingsPage() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 500));
     setIsPasswordLoading(false);
+    console.log(values);
   };
 
   return (
