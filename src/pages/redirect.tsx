@@ -1,48 +1,45 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Link2 } from "lucide-react";
-import { useUrl } from "../context/url-context";
+import redirectToUrl from "../api/queries/redirectToUrl";
 
 export default function RedirectPage() {
   const { shortCode } = useParams<{ shortCode: string }>();
-  const { getUrl, incrementClicks } = useUrl();
+
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(3);
-  const [url, setUrl] = useState<string | null>(null);
+  const [url, setUrl] = useState<string>("");
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
+
     if (!shortCode) {
       navigate("/");
       return;
     }
-
-    const urlData = getUrl(shortCode);
-    if (!urlData) {
-      navigate("/");
-      return;
+    if (shortCode && navigate) {
+      redirectToUrl(shortCode).then(({ data }) => {
+        if (!data.longUrl) {
+          navigate("/");
+          return;
+        }
+        setUrl(data.longUrl);
+        // Start countdown after URL is set
+        timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              window.location.href = data.longUrl;
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      });
     }
 
-    setUrl(urlData.originalUrl);
-    incrementClicks(shortCode);
-
-    // Start countdown
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          window.location.href = urlData.originalUrl;
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
     return () => clearInterval(timer);
-  }, [shortCode, getUrl, incrementClicks, navigate]);
-
-  if (!url) {
-    return null;
-  }
+  }, [shortCode, navigate]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
@@ -57,9 +54,11 @@ export default function RedirectPage() {
         </h1>
         <p className="text-muted-foreground">You are being redirected to:</p>
         <div className="rounded-md border p-4">
-          <a href={url} className="break-all text-primary hover:underline">
-            {url}
-          </a>
+          {url && (
+            <a href={url} className="break-all text-primary hover:underline">
+              {url}
+            </a>
+          )}
         </div>
         <p className="text-sm text-muted-foreground">
           If you are not redirected automatically, click the link above.
