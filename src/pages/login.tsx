@@ -54,8 +54,8 @@ export default function LoginPage() {
         description: "Welcome back!",
       });
       navigate("/");
-    } catch (error: any) {
-      console.log(error.message);
+    } catch (error) {
+      console.log(error);
       toast({
         variant: "destructive",
         title: "Login failed",
@@ -105,11 +105,7 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
