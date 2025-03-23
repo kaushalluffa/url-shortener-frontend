@@ -1,7 +1,20 @@
 import { useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 
@@ -42,7 +55,6 @@ export default function SettingsPage() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 500));
     setIsProfileLoading(false);
-    console.log("Profile updated:", values);
   };
 
   const onPasswordSubmit = async (values: PasswordFormValues) => {
@@ -50,7 +62,6 @@ export default function SettingsPage() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 500));
     setIsPasswordLoading(false);
-    console.log("Password updated:", values);
   };
 
   return (

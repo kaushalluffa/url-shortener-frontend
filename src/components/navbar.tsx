@@ -41,11 +41,11 @@ export function Navbar({ user }: NavbarProps) {
       icon: <LayoutDashboard className="h-4 w-4" />,
     },
     { name: "Create URL", path: "/create", icon: <Plus className="h-4 w-4" /> },
-    {
-      name: "Settings",
-      path: "/settings",
-      icon: <Settings className="h-4 w-4" />,
-    },
+    // {
+    //   name: "Settings",
+    //   path: "/settings",
+    //   icon: <Settings className="h-4 w-4" />,
+    // },
   ];
 
   const isActive = (path: string) => {
