@@ -1,85 +1,64 @@
 import type React from "react";
 
-import { createContext, useContext, useState, useEffect } from "react";
-import { generateShortCode } from "../lib/utils";
-
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createContext, useContext, useState } from "react";
+import { createShortUrl } from "../api/mutations/createShortUrl";
+import listUrls from "../api/queries/listUrls";
+import useAuthedApiClient from "../hooks/useAuthedApiClient";
+import { Pagination } from "../types";
+import { useSearchParams } from "react-router";
 
 export type UrlData = {
-  id: string;
-  originalUrl: string;
-  shortCode: string;
-  createdAt: Date;
-  clicks: number;
+  _id: string;
+  long_url: string;
+  short_url: string;
+  created_at: Date;
+  click_count: number;
 };
 
 type UrlContextType = {
-  urls: UrlData[];
+  urlsData: { listOfUrls: UrlData[]; totalCount: number };
   addUrl: (originalUrl: string) => Promise<UrlData>;
-  getUrl: (shortCode: string) => UrlData | undefined;
-  incrementClicks: (shortCode: string) => void;
-  deleteUrl: (id: string) => void;
+  pagination: Pagination;
+  setPagination: React.Dispatch<React.SetStateAction<Pagination>>;
 };
 
 const UrlContext = createContext<UrlContextType | undefined>(undefined);
 
 export function UrlProvider({ children }: { children: React.ReactNode }) {
-  const [urls, setUrls] = useState<UrlData[]>([]);
-
-  useEffect(() => {
-    // Load URLs from localStorage
-    const storedUrls = localStorage.getItem("urls");
-    if (storedUrls) {
-      setUrls(
-        JSON.parse(storedUrls).map((url: any) => ({
-          ...url,
-          createdAt: new Date(url.createdAt),
-        }))
-      );
-    }
-  }, []);
-
-  const saveUrls = (updatedUrls: UrlData[]) => {
-    localStorage.setItem("urls", JSON.stringify(updatedUrls));
-    setUrls(updatedUrls);
-  };
+  const [searchParams] = useSearchParams();
+  const [pagination, setPagination] = useState<Pagination>({
+    pageIndex: Number(searchParams.get("page"))
+      ? Number(searchParams.get("page")) - 1
+      : 0,
+    pageSize: 10,
+  });
+  const authedApiClient = useAuthedApiClient();
+  const createShortUrlMutation = useMutation({
+    mutationFn: (longUrl: string) => createShortUrl(authedApiClient, longUrl),
+  });
+  const { data } = useQuery({
+    queryFn: () =>
+      listUrls(
+        authedApiClient,
+        pagination,
+        searchParams.get("search")?.toString()
+      ),
+    queryKey: ["LIST_URLS", pagination, searchParams.get("search")],
+  });
 
   const addUrl = async (originalUrl: string) => {
-    // Generate a unique short code
-    const shortCode = generateShortCode();
-
-    const newUrl: UrlData = {
-      id: Date.now().toString(),
-      originalUrl,
-      shortCode,
-      createdAt: new Date(),
-      clicks: 0,
-    };
-
-    const updatedUrls = [...urls, newUrl];
-    saveUrls(updatedUrls);
-
-    return newUrl;
-  };
-
-  const getUrl = (shortCode: string) => {
-    return urls.find((url) => url.shortCode === shortCode);
-  };
-
-  const incrementClicks = (shortCode: string) => {
-    const updatedUrls = urls.map((url) =>
-      url.shortCode === shortCode ? { ...url, clicks: url.clicks + 1 } : url
-    );
-    saveUrls(updatedUrls);
-  };
-
-  const deleteUrl = (id: string) => {
-    const updatedUrls = urls.filter((url) => url.id !== id);
-    saveUrls(updatedUrls);
+    return await createShortUrlMutation.mutateAsync(originalUrl);
   };
 
   return (
     <UrlContext.Provider
-      value={{ urls, addUrl, getUrl, incrementClicks, deleteUrl }}
+      value={{
+        urlsData: data,
+        addUrl,
+        setPagination,
+        pagination,
+      }}
     >
       {children}
     </UrlContext.Provider>
