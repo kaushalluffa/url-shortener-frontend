@@ -28,9 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(
     JSON.parse(localStorage.getItem("user"))
   );
-  const [accessToken, setAccessToken] = useState<string | null>(
-    localStorage.getItem("accessToken")
-  );
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is logged in
@@ -42,15 +40,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginUserMutation = useMutation({
     mutationFn: loginUser,
-    onSuccess: (data) => {
-      console.log(data, "loginUserMutation  ");
-    },
   });
   const registerUserMutation = useMutation({
     mutationFn: registerUser,
-    onSuccess: (data) => {
-      console.log(data, "registerUserMutation  ");
-    },
   });
   const logoutUserMutation = useMutation({
     mutationFn: logoutUser,
