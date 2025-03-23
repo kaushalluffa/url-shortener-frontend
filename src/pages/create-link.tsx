@@ -7,8 +7,23 @@ import * as z from "zod";
 import { Copy, Link2 } from "lucide-react";
 import { useUrl } from "../context/url-context";
 import { useToast } from "../hooks/use-toast";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 
@@ -34,13 +49,14 @@ export default function CreateLinkPage() {
     setIsLoading(true);
     try {
       const newUrl = await addUrl(values.url);
-      const shortUrl = `${window.location.origin}/${newUrl.shortCode}`;
+      const shortUrl = `${window.location.origin}/${newUrl.short_url}`;
       setShortUrl(shortUrl);
       toast({
         title: "URL shortened",
         description: "Your URL has been shortened successfully.",
       });
     } catch (error) {
+      console.log(error, "error");
       toast({
         variant: "destructive",
         title: "Error",
